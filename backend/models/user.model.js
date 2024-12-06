@@ -24,6 +24,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    bannerImg: {
+      type: String,
+      default: "",
+    },
     headLine: {
       type: String,
       default: "Social User",

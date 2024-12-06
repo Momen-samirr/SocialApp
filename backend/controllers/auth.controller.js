@@ -15,6 +15,16 @@ export const signUp = expressAsyncHandler(async (req, res, next) => {
       new appError("Please provide all fields", 400, httpStatus.FAILED)
     );
 
+  if (passWord.length < 6) {
+    return next(
+      new appError(
+        "Password must be at least 6 characters",
+        400,
+        httpStatus.FAILED
+      )
+    );
+  }
+
   const existingUserName = await User.findOne({ userName });
   if (existingUserName)
     return next(
