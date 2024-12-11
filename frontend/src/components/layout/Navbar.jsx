@@ -37,6 +37,8 @@ const Navbar = () => {
     (notification) => !notification.read
   ).length;
 
+  console.log("authUser", authUser);
+
   const unreadConnectionRequests = connectionRequests?.data.length;
   return (
     <div className="bg-secondary shadow-md sticky top-0 z-10">
@@ -85,7 +87,7 @@ const Navbar = () => {
                   )}
                 </Link>
                 <Link
-                  to={`/profile/${authUser.userName}`}
+                  to={`/profile/${authUser?.data?.userName}`}
                   className="flex flex-col items-center text-neutral"
                 >
                   <User size={20} />

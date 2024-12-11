@@ -93,7 +93,8 @@ export const deletePost = expressAsyncHandler(async (req, res, next) => {
 });
 
 export const getPostById = expressAsyncHandler(async (req, res, next) => {
-  const post = await Post.findById(req.params.id)
+  const { id: postId } = req.params;
+  const post = await Post.findById(postId)
     .populate("author", "name email userName profilePicure bannerImg headLine")
     .populate(
       "comments.user",

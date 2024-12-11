@@ -19,15 +19,15 @@ import { formatDistanceToNow } from "date-fns";
 const Post = ({ post }) => {
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
   const [showComments, setShowComments] = useState(false);
-  const [comments, setComments] = useState(post.comments || []);
+  const [comments, setComments] = useState(post?.comments || []);
   const [newComment, setNewComment] = useState("");
   const { postId } = useParams();
-  const isOwner = authUser?.data?._id === post.author._id;
+  const isOwner = authUser?.data?._id === post?.author?._id;
 
   const isCommentOwner = comments.some(
     (comment) => comment.user._id === authUser?.data?._id
   );
-  const isLiked = post.likes.includes(authUser?.data?._id);
+  const isLiked = post?.likes?.includes(authUser?.data?._id);
 
   const queryClient = useQueryClient();
 
@@ -95,7 +95,7 @@ const Post = ({ post }) => {
         user: {
           _id: authUser?.data?._id,
           name: authUser?.data?.name,
-          profilePicure: authUser.data?.profilePic,
+          profilePicure: authUser.data?.profilePicure,
         },
         createdAt: new Date(),
       },

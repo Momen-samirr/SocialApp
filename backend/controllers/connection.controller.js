@@ -249,11 +249,12 @@ export const getConnectionRequests = expressAsyncHandler(
       );
     }
 
-    res.status(200).json({
-      status: httpStatus.SUCCESS,
-      message: "Connection requests fetched successfully",
-      data: requests,
-    });
+    // res.status(200).json({
+    //   status: httpStatus.SUCCESS,
+    //   message: "Connection requests fetched successfully",
+    //   data: requests,
+    // });
+    res.status(200).json(requests);
   }
 );
 
@@ -263,7 +264,7 @@ export const getUserConnections = expressAsyncHandler(
 
     const user = await User.findById(userId).populate(
       "connections",
-      "name userName email profilePicure"
+      "name userName headLine email profilePicure"
     );
 
     if (!user) {
