@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../../lib/axios";
 import toast from "react-hot-toast";
 import { Link, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Heart,
   Loader,
@@ -24,12 +25,25 @@ const Post = ({ post }) => {
   const { postId } = useParams();
   const isOwner = authUser?.data?._id === post?.author?._id;
 
-  const isCommentOwner = comments.some(
-    (comment) => comment.user._id === authUser?.data?._id
+  const isCommentOwner = comments.map((comment) =>
+    comment.user?._id === authUser?.data?._id ? comment : null
   );
   const isLiked = post?.likes?.includes(authUser?.data?._id);
+  const isCommentLoved = comments.find((comment) =>
+    comment.loves?.includes(authUser?.data?._id)
+  );
+
+  console.log("isCommentLoved", isCommentLoved);
+
+  console.log("isCommentOwner", isCommentOwner);
+  console.log("comments", post?.comments);
 
   const queryClient = useQueryClient();
+
+  const { data: getPostComments } = useQuery({
+    queryKey: ["postComments", postId],
+    queryFn: async () => await axiosInstance.get(`/posts/comments/${post._id}`),
+  });
 
   const { mutate: deletePost, isPending: isDeletePending } = useMutation({
     mutationFn: async () => {
@@ -57,6 +71,23 @@ const Post = ({ post }) => {
         toast.error("Failed to delete comment");
       },
     });
+
+  const { mutate: loveComment, isPending: isCommentLovePending } = useMutation({
+    mutationFn: async (commentId) =>
+      await axiosInstance.post(`/posts/love/${post._id}/${commentId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post", postId] });
+    },
+    onError: (error) => {
+      toast.error(error?.response?.data?.message);
+    },
+  });
+
+  const handelLoveComment = (commentId) => {
+    loveComment(commentId);
+    getPostComments();
+  };
 
   const handelDeletePost = () => {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
@@ -173,14 +204,19 @@ const Post = ({ post }) => {
           />
           <PostAction
             icon={<MessageCircle size={16} />}
-            text={`Comment ${comments.length}`}
+            text={`Comment (${comments.length})`}
             onClick={() => setShowComments(!showComments)}
           />
           <PostAction icon={<Share2 size={16} />} text="Share" />
         </div>
       </div>
       {showComments && (
-        <div className="px-4 pb-4">
+        <motion.div
+          className="px-4 pb-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="mb-4 max-h-60 overflow-y-auto">
             {comments.map((comment) => (
               <div
@@ -205,15 +241,58 @@ const Post = ({ post }) => {
                   </div>
                   <p>{comment.content}</p>
                 </div>
-                {isCommentOwner && (
+                {comment?.user?._id === authUser?.data?._id ? (
+                  <div className="flex gap-3">
+                    <button
+                      className="text-blue-500 hover:text-blue-600"
+                      onClick={() => handelLoveComment(comment._id)}
+                    >
+                      {isCommentLovePending ? (
+                        <Loader className="animate-spin" />
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <Heart
+                            size={16}
+                            className={
+                              comment?.loves?.includes(authUser?.data?._id)
+                                ? "text-red-500 fill-red-500"
+                                : ""
+                            }
+                          />
+                          <span>({comment?.loves?.length})</span>
+                        </div>
+                      )}
+                    </button>
+                    <button
+                      className="text-red-500 hover:text-red-700"
+                      onClick={() => handelDeleteComment(comment._id)}
+                    >
+                      {isCommentDeletePending ? (
+                        <Loader className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                    </button>
+                  </div>
+                ) : (
                   <button
-                    className="text-red-500 hover:text-red-700"
-                    onClick={() => handelDeleteComment(comment._id)}
+                    className="text-blue-500 hover:text-blue-600"
+                    onClick={() => handelLoveComment(comment._id)}
                   >
-                    {isCommentDeletePending ? (
+                    {isCommentLovePending ? (
                       <Loader className="animate-spin" />
                     ) : (
-                      <Trash2 size={16} />
+                      <div className="flex items-center gap-1">
+                        <Heart
+                          size={16}
+                          className={
+                            comment?.loves?.includes(authUser?.data?._id)
+                              ? "text-red-500 fill-red-500"
+                              : ""
+                          }
+                        />
+                        <span>({comment?.loves?.length})</span>
+                      </div>
                     )}
                   </button>
                 )}
@@ -240,7 +319,7 @@ const Post = ({ post }) => {
               )}
             </button>
           </form>
-        </div>
+        </motion.div>
       )}
     </div>
   );

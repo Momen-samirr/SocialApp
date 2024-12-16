@@ -128,7 +128,9 @@ export const createComment = expressAsyncHandler(async (req, res, next) => {
     {
       new: true,
     }
-  ).populate("author", "name userName email profilePicure bannerImg headLine");
+  )
+    .populate("author", "name userName email profilePicure bannerImg headLine")
+    .sort({ createdAt: -1 });
   if (post.author._id.toString() !== req.user._id.toString()) {
     const newNotification = new Notification({
       recipient: post.author,
@@ -210,5 +212,47 @@ export const deleteComment = expressAsyncHandler(async (req, res, next) => {
     status: httpStatus.SUCCESS,
     message: "Comment deleted successfully",
     data: post,
+  });
+});
+
+export const loveComment = expressAsyncHandler(async (req, res, next) => {
+  const { postId, commentId } = req.params;
+  const currentUserId = req.user._id;
+
+  const post = await Post.findById(postId);
+
+  if (!post)
+    return next(new appError("Post not found", 404, httpStatus.FAILED));
+
+  const comment = post.comments.find((c) => c._id.toString() === commentId);
+
+  if (!comment)
+    return next(new appError("Comment not found", 404, httpStatus.FAILED));
+  if (comment.loves.includes(currentUserId)) {
+    comment.loves = comment.loves.filter(
+      (id) => id.toString() !== currentUserId.toString()
+    );
+  } else {
+    comment.loves.push(currentUserId);
+  }
+  await post.save();
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Comment loved successfully",
+    data: post,
+  });
+});
+
+export const getPostComments = expressAsyncHandler(async (req, res, next) => {
+  const { postId } = req.params;
+  const post = await Post.findById(postId);
+  if (!post)
+    return next(new appError("Post not found", 404, httpStatus.FAILED));
+
+  const comments = post.comments;
+  res.status(200).json({
+    status: httpStatus.SUCCESS,
+    message: "Comments fetched successfully",
+    data: comments,
   });
 });
