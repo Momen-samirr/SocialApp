@@ -14,6 +14,7 @@ import postRoutes from "./routes/post.route.js";
 import notificationRoutes from "./routes/notification.route.js";
 import connectionsRoutes from "./routes/connection.route.js";
 import userService from "./soap/user.service.js";
+import startGrpcServer from "./utilities/grpcServer.js"; // Import gRPC server
 import { fileURLToPath } from "url";
 
 // Configurations
@@ -45,7 +46,10 @@ soap.listen(app, "/soap/user", userService, wsdl, () => {
   console.log("SOAP UserService is running at /soap/user");
 });
 
-// Start the server
+// Start the gRPC Server
+startGrpcServer();
+
+// Start the REST and SOAP server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   connectDB();

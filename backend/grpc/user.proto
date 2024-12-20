@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package user;
+
+// Service Definition
+service UserService {
+  rpc GetSuggestions (UserRequest) returns (UserListResponse);
+  rpc GetPublicProfile (PublicProfileRequest) returns (UserResponse);
+}
+
+// Request and Response Messages
+message UserRequest {
+  string userId = 1;
+}
+
+message PublicProfileRequest {
+  string userName = 1;
+}
+
+message UserResponse {
+  string id = 1;
+  string name = 2;
+  string userName = 3;
+  string profilePicure = 4;
+  string headLine = 5;
+}
+
+message UserListResponse {
+  repeated UserResponse users = 1;
+}
