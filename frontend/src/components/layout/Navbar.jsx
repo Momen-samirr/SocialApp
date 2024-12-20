@@ -33,7 +33,7 @@ const Navbar = () => {
     },
   });
 
-  const unreadNotifications = notifications?.data.filter(
+  const unreadNotifications = notifications?.data?.filter(
     (notification) => !notification.read
   ).length;
 

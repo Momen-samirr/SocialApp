@@ -1,0 +1,72 @@
+<definitions name="UserService"
+    targetNamespace="http://example.com/soap"
+    xmlns:tns="http://example.com/soap"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <message name="GetSuggestionsRequest">
+        <part name="userId" type="xsd:string"/>
+    </message>
+    <message name="GetSuggestionsResponse">
+        <part name="suggestions" type="xsd:string"/>
+    </message>
+
+    <message name="GetPublicProfileRequest">
+        <part name="userName" type="xsd:string"/>
+    </message>
+    <message name="GetPublicProfileResponse">
+        <part name="profile" type="xsd:string"/>
+    </message>
+
+    <message name="UpdateProfileRequest">
+        <part name="userId" type="xsd:string"/>
+        <part name="profileData" type="xsd:string"/>
+    </message>
+    <message name="UpdateProfileResponse">
+        <part name="message" type="xsd:string"/>
+    </message>
+
+    <portType name="UserServicePortType">
+        <operation name="GetSuggestions">
+            <input message="tns:GetSuggestionsRequest"/>
+            <output message="tns:GetSuggestionsResponse"/>
+        </operation>
+        <operation name="GetPublicProfile">
+            <input message="tns:GetPublicProfileRequest"/>
+            <output message="tns:GetPublicProfileResponse"/>
+        </operation>
+        <operation name="UpdateProfile">
+            <input message="tns:UpdateProfileRequest"/>
+            <output message="tns:UpdateProfileResponse"/>
+        </operation>
+    </portType>
+
+    <binding name="UserServiceBinding" type="tns:UserServicePortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        
+        <operation name="GetSuggestions">
+            <soap:operation soapAction="http://example.com/soap/GetSuggestions"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+        
+        <operation name="GetPublicProfile">
+            <soap:operation soapAction="http://example.com/soap/GetPublicProfile"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+        
+        <operation name="UpdateProfile">
+            <soap:operation soapAction="http://example.com/soap/UpdateProfile"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+
+    <service name="UserService">
+        <port name="UserServicePort" binding="tns:UserServiceBinding">
+            <soap:address location="http://localhost:5011/soap/user"/>
+        </port>
+    </service>
+</definitions>

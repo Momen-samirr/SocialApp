@@ -1,0 +1,80 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: mongoDb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-net
+
+  restfulapi:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - mongo
+    container_name: rest-api
+    restart: unless-stopped
+    env_file: ./backend/.env
+    volumes:
+      - ./backend:/app/server
+    networks:
+      - app-net
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - restfulapi
+    container_name: react-ui
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - app-net
+    ports:
+      - "5173:5173"
+
+  grpcapi:
+    build:
+      context: ./grpc
+      dockerfile: Dockerfile
+    container_name: grpc-api
+    restart: unless-stopped
+    env_file: ./grpc/.env
+    volumes:
+      - ./grpc:/app/server
+    networks:
+      - app-net
+    ports:
+      - "50051:50051"
+
+  soapcapi:
+    build:
+      context: ./soap
+      dockerfile: Dockerfile
+    container_name: soap-api
+    restart: unless-stopped
+    env_file: ./soap/.env
+    volumes:
+      - ./soap:/app/server
+    networks:
+      - app-net
+    ports:
+      - "5011:5011"
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  mongo_data:
